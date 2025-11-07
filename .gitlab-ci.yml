@@ -1,0 +1,26 @@
+image: node:20
+
+stages:
+  - build
+
+variables:
+  ANDROID_HOME: /usr/lib/android-sdk
+  GRADLE_USER_HOME: /builds/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/.gradle
+
+before_script:
+  - npm install -g @ionic/cli
+  - npm ci
+  - npm run build
+  - npx cap sync android
+
+build_android:
+  stage: build
+  image: openjdk:17-jdk
+  script:
+    - cd android
+    - chmod +x gradlew
+    - ./gradlew assembleDebug
+  artifacts:
+    paths:
+      - android/app/build/outputs/apk/debug/app-debug.apk
+    expire_in: 1 week
